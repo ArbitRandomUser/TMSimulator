@@ -115,10 +115,10 @@ function make_dfunc_M(S,pulses)
         M .= reshape(view(MDparams, 1:bound), size(M))
         M .+= transpose(reshape(view(MDparams, 1:bound), size(M))) ##HERMITIAN
         M .= M./2
-        for i in 1:S.dim
+        for i in 1:S.dim #this loop disables M training by setting it to 0.
             M[i,i] = 0.0
         end
-        for i = 3:length(Ds) #CHANGE 1:length (all matrices) , 2:length(only D1 and D2) , 3:length(only D2) 
+        for i = 2:length(Ds) # set 1:length(Ds) for both D1 and D2 , 2:length(Ds) for only D2 
             Ds[i] .=
                 reshape(view(MDparams, bound+1+(i-1)*bound:bound+(i)*bound), size(Ds[i]))
             Ds[i] .+=
