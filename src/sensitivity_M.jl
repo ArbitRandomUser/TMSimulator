@@ -111,11 +111,11 @@ function make_dfunc_M(S,pulses)
     function dfunc(dstate, state, MDparams, t) #MD params is the parameters of M and D matrices as params
         scratch .= 0
         bound = S.dim^2
-        M .= 0
+        M .= 0 #disables M training
         M .= reshape(view(MDparams, 1:bound), size(M))
         M .+= transpose(reshape(view(MDparams, 1:bound), size(M))) ##HERMITIAN
         M .= M./2
-        for i in 1:S.dim #this loop disables M training by setting it to 0.
+        for i in 1:S.dim #disables diagonals .
             M[i,i] = 0.0
         end
         for i = 2:length(Ds) # set 1:length(Ds) for both D1 and D2 , 2:length(Ds) for only D2 
