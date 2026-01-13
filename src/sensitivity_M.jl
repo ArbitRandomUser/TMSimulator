@@ -110,7 +110,7 @@ function make_dfunc_M(S,pulses,train_M=false,train_Ds=(2,))
     H_J = get_HJ(S, S.params) 
     scratch = zeros(2 * S.dim)
     drives = get_drives(S, S.params)
-    @assert max(train_Ds...)<S.N
+    @assert max(train_Ds...)<=S.N
     function dfunc(dstate, state, MDparams, t) #MD params is the parameters of M and D matrices as params
         scratch .= 0
         bound = S.dim^2
@@ -168,10 +168,12 @@ function make_MDprob(
     S::System,
     pulses::Array;
     MDparams::Array = zeros((1+ S.N)*S.dim^2),
-    u0 =  begin state = zeros(2*S.dim); state[1] = 1.0; state end
+    u0 =  begin state = zeros(2*S.dim); state[1] = 1.0; state end,
+    train_M=false,
+    train_Ds=(2,),
 )
     tspan::Tuple = pulse_tspan(S, pulses)
-    dfunc = make_dfunc_M(S, pulses)
+    dfunc = make_dfunc_M(S, pulses,train_M,train_Ds)
     prob = ODEProblem{true}(dfunc, u0, tspan, MDparams)
     return prob, MDparams
 end
