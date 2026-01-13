@@ -94,11 +94,13 @@ end
     the hamiltonian is the ibm hamiltonian evolved in the interaction picture.
     there is a correction term M and D to the Hamiltonian whose elements are passed in as 
     MDparams.
+    train_M , toggles training static correction (default is off)
+    train_Ds , a tuple of integers specifying which dynamic corrections are to be trained (default is just the second qubit)
 
     M is hermitianized, and its diagnols are set to 0.
     D is hermitianized.
 """
-function make_dfunc_M(S,pulses)
+function make_dfunc_M(S,pulses,train_M=false,train_Ds=(2,))
     S = deepcopy(S)
     M = zeros(S.dim, S.dim)
     Ds = [zeros(S.dim, S.dim) for _ = 1:S.N]
@@ -108,17 +110,20 @@ function make_dfunc_M(S,pulses)
     H_J = get_HJ(S, S.params) 
     scratch = zeros(2 * S.dim)
     drives = get_drives(S, S.params)
+    @assert max(train_Ds)<S.N
     function dfunc(dstate, state, MDparams, t) #MD params is the parameters of M and D matrices as params
         scratch .= 0
         bound = S.dim^2
-        M .= 0 #disables M training
+        if !train_M #disable M training
+            M .= 0 
+        end
         M .= reshape(view(MDparams, 1:bound), size(M))
         M .+= transpose(reshape(view(MDparams, 1:bound), size(M))) ##HERMITIAN
         M .= M./2
         for i in 1:S.dim #disables diagonals .
             M[i,i] = 0.0
         end
-        for i = 2:length(Ds) # set 1:length(Ds) for both D1 and D2 , 2:length(Ds) for only D2 
+        for i in train_Ds 
             Ds[i] .=
                 reshape(view(MDparams, bound+1+(i-1)*bound:bound+(i)*bound), size(Ds[i]))
             Ds[i] .+=
@@ -156,7 +161,10 @@ function make_dfunc_M(S,pulses)
     end
 end
 
-function make_MDprob!(
+"""
+    make_MDprob , makes an ODEproblem with correction matrices , the matrices are defined by a flat array of 1+no_of_qubits matrices, one static correction and one dynamic correction for each qubit.
+"""
+function make_MDprob(
     S::System,
     pulses::Array;
     MDparams::Array = zeros((1+ S.N)*S.dim^2),

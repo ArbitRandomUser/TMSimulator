@@ -495,7 +495,7 @@ include("sensitivity_int_H.jl")
 export System,make_system,make_system,set_pulse_freq!,set_pulse_inphase!,set_pulse_quad!,set_pulse!,pulse_tspan
 export evolve_oncomplex
 export make_dfunc_neural,make_neuralH_prob
-export make_dfunc_M,make_MDprob!
+export make_dfunc_M,make_MDprob
 export makeNN
 export plotsol,plotsol!,plotdrive,probdist
 end
