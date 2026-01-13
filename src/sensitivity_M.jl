@@ -110,7 +110,7 @@ function make_dfunc_M(S,pulses,train_M=false,train_Ds=(2,))
     H_J = get_HJ(S, S.params) 
     scratch = zeros(2 * S.dim)
     drives = get_drives(S, S.params)
-    @assert max(train_Ds)<S.N
+    @assert max(train_Ds...)<S.N
     function dfunc(dstate, state, MDparams, t) #MD params is the parameters of M and D matrices as params
         scratch .= 0
         bound = S.dim^2
